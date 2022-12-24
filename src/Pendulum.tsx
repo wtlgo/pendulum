@@ -20,9 +20,10 @@ const Pendulum: React.FC<
             size?: TSize;
             length?: number;
             isOnPause?: boolean;
+            acceleration?: number;
         } & React.HTMLAttributes<HTMLCanvasElement>
     >
-> = ({ size, length, isOnPause, className }) => {
+> = ({ size, length, isOnPause, className, acceleration }) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const requestIdRef = useRef<number | null>(null);
     const prevTimestampRef = useRef<number | null>(null);
@@ -39,6 +40,8 @@ const Pendulum: React.FC<
     const pixelLength = length ?? 250;
     const meterLength = pixelLength / 100;
 
+    const a = acceleration ?? 0;
+
     const updateModel = useCallback(
         (delta: number) => {
             if (onPause) return;
@@ -50,9 +53,10 @@ const Pendulum: React.FC<
                 const { t, v } = anglesRef.current;
 
                 const nextV =
-                    v -
+                    v +
                     pdelta *
-                        ((g * Math.sin(t)) / meterLength +
+                        (a -
+                            (g * Math.sin(t)) / meterLength -
                             (c / m) * meterLength * v);
 
                 anglesRef.current = {
@@ -61,7 +65,7 @@ const Pendulum: React.FC<
                 };
             }
         },
-        [onPause, meterLength]
+        [onPause, meterLength, a]
     );
 
     const renderFrame = useCallback(() => {
